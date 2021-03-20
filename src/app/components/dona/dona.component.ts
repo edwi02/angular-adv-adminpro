@@ -24,7 +24,6 @@ export class DonaComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    console.log('Ingresa');
   }
 
 }
