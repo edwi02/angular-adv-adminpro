@@ -44,14 +44,25 @@ Login register and recover password Page
   margin-bottom: 30px; 
 }
   
-  #recoverform {
-    display: none; }
+#recoverform {
+  display: none; 
+}
   
-  .login-sidebar {
-    padding: 0px;
-    margin-top: 0px; }
-    .login-sidebar .login-box {
-      right: 0px;
-      position: absolute;
-      height: 100%; }
+.login-sidebar {
+  padding: 0px;
+  margin-top: 0px; 
+}
+
+.login-sidebar .login-box {
+  right: 0px;
+  position: absolute;
+  height: 100%; 
+}
+
+#google-btn {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
   
