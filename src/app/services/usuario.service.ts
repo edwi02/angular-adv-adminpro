@@ -8,6 +8,7 @@ import { LoginForm } from '../interfaces/login-form.interface';
 
 import { tap, map, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { Usuario } from '../models/usuario.mode';
 
 const baseUrl = environment.base_url;
 
@@ -20,6 +21,15 @@ export class UsuarioService {
 
 
   public auth2: any;
+  public usuario: Usuario;
+
+  get token(): string {
+    return localStorage.getItem('xToken') || '';
+  }
+
+  get uid(): string {
+    return this.usuario.uid || '';
+  }
 
   constructor( private http: HttpClient,
                private router: Router,
@@ -28,24 +38,27 @@ export class UsuarioService {
   }
 
   validarToken(): Observable<boolean> {
-    const token = localStorage.getItem('xToken') || '';
 
     console.log('xToken del servicio');
 
     return this.http.get<any>(`${ baseUrl }/login/renew`, {
       headers: {
-        'x-token': token
+        'x-token': this.token
       }
     }).pipe(
-      tap( resp => {
+      map( resp => {
+        const { email, google, nombre, role, img = '', uid } = resp.usuario;
+        console.log('Usuario', resp.usuario);
+        this.usuario = new Usuario(nombre, email, role, '', img, google, uid );
         localStorage.setItem('xToken', resp.token);
+
+        return true;
       }),
-      map( resp => true ),
       catchError( error => of(false) )
     );
 
-
   }
+
 
   crearUsuario( formData: RegisterForm ): Observable<any>  {
 
@@ -57,6 +70,21 @@ export class UsuarioService {
             );
 
   }
+
+  actualizarPerfil( data: { email: string, nombre: string, role: string } ): Observable<any> {
+
+    data = {
+      ...data ,
+      role: this.usuario.role
+    };
+
+    return this.http.put<any>(`${ baseUrl }/usuarios/${ this.uid }`, data, {
+      headers: {
+        'x-token': this.token
+      }
+    });
+  }
+
 
   logout(): void {
     localStorage.removeItem('xToken');
