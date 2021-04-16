@@ -3,10 +3,13 @@ import { Injectable, NgZone } from '@angular/core';
 
 import { RegisterForm } from '../interfaces/register-form.interface';
 import { environment } from '../../environments/environment';
-import { Observable, of } from 'rxjs';
-import { LoginForm } from '../interfaces/login-form.interface';
 
+import { Observable, of, pipe } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
+
+import { LoginForm } from '../interfaces/login-form.interface';
+import { CargarUsuario } from '../interfaces/cargar-usuarios.interface';
+
 import { Router } from '@angular/router';
 import { Usuario } from '../models/usuario.mode';
 
@@ -29,6 +32,14 @@ export class UsuarioService {
 
   get uid(): string {
     return this.usuario.uid || '';
+  }
+
+  get headers(): any  {
+    return {
+      headers: {
+        'x-token': this.token
+      }
+    };
   }
 
   constructor( private http: HttpClient,
@@ -133,5 +144,49 @@ export class UsuarioService {
               localStorage.setItem('xToken', resp.token);
             })
           );
+  }
+
+  cargarUsuarios( desde: number = 0 ): Observable<any> {
+    const url = `${ baseUrl }/usuarios?desde=${ desde }`;
+
+    return this.http.get<CargarUsuario>(url, this.headers )
+            .pipe(
+              map( resp => {
+                console.log(resp);
+
+                // tslint:disable-next-line:no-string-literal
+                const usuarios = resp['usuarios'].map(
+                  user => new Usuario( user.nombre, user.email, user.role, '', user.img, user.google, user.uid )
+                );
+
+                console.log('Usrs', usuarios);
+
+                return {
+                  // tslint:disable-next-line:no-string-literal
+                  total: resp['total'],
+                  usuarios
+                };
+
+                // return resp;
+              })
+            );
+    // return this.http.get<CargarUsuario>(url );
+  }
+
+  eliminarUsuario( usuario: Usuario ): Observable<any> {
+
+    const url = `${ baseUrl }/usuarios/${ usuario.uid }`;
+
+    return this.http.delete( url, this.headers );
+  }
+
+  guardarUsuario( usuario: Usuario ): Observable<any> {
+
+    /* data = {
+      ...data ,
+      role: this.usuario.role
+    }; */
+
+    return this.http.put<Usuario>(`${ baseUrl }/usuarios/${ usuario.uid }`, usuario, this.headers );
   }
 }
