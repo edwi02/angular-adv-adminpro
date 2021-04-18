@@ -87,7 +87,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   eliminarUsuario( usuario: Usuario ): any {
 
-    if( usuario.uid === this.usuarioService.uid ) {
+    if ( usuario.uid === this.usuarioService.uid ) {
       return Swal.fire('Error', 'No puede borrarse a si mismo', 'error');
     }
 

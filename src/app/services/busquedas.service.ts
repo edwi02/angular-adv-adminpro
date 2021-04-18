@@ -4,6 +4,8 @@ import { environment } from '../../environments/environment';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Usuario } from '../models/usuario.mode';
+import { Hospital } from '../models/hospital.model';
+import { Medico } from '../models/medico.model';
 
 
 const baseUrl = environment.base_url;
@@ -34,6 +36,17 @@ export class BusquedasService {
     );
   }
 
+  private transformarHospitales(resultados: Hospital[] ): Hospital[] {
+    return resultados;
+    /* return resultados.map(
+      hospital => new Hospital( hospital.nombre, hospital._id, hospital.img, hospital.Usuario )
+    ); */
+  }
+
+  private transformarMedicos( resultados: Medico[] ): Medico[] {
+    return resultados;
+  }
+
   buscar(
     tipo: 'usuarios'|'medicos'|'hospitales',
     termino: string
@@ -46,6 +59,12 @@ export class BusquedasService {
           switch ( tipo ) {
             case 'usuarios':
               return this.transformarUsuarios( resp.resultados );
+
+            case 'hospitales':
+              return this.transformarHospitales( resp.resultados );
+
+            case 'medicos':
+              return this.transformarMedicos( resp.resultados );
 
             default:
               return [];
