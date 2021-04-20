@@ -42,10 +42,19 @@ export class UsuarioService {
     };
   }
 
+  get role(): 'ADMIN_ROLE' | 'USER_ROLE' {
+    return this.usuario.role;
+  }
+
   constructor( private http: HttpClient,
                private router: Router,
                private ngZone: NgZone) {
     this.googleInit();
+  }
+
+  guardarLocalStorage( token: string, menu: any ): void {
+    localStorage.setItem('xToken', token);
+    localStorage.setItem('menu', JSON.stringify(menu) );
   }
 
   validarToken(): Observable<boolean> {
@@ -61,7 +70,8 @@ export class UsuarioService {
         const { email, google, nombre, role, img = '', uid } = resp.usuario;
         console.log('Usuario', resp.usuario);
         this.usuario = new Usuario(nombre, email, role, '', img, google, uid );
-        localStorage.setItem('xToken', resp.token);
+
+        this.guardarLocalStorage( resp.token, resp.menu );
 
         return true;
       }),
@@ -76,7 +86,7 @@ export class UsuarioService {
     return this.http.post<any>(`${ baseUrl }/usuarios`, formData )
               .pipe(
                 tap( resp => {
-                  localStorage.setItem('xToken', resp.token);
+                  this.guardarLocalStorage( resp.token, resp.menu );
                 })
             );
 
@@ -98,6 +108,8 @@ export class UsuarioService {
 
 
   logout(): void {
+    // TODO: Borrar menu 
+
     localStorage.removeItem('xToken');
     this.auth2.signOut().then( () => {
 
@@ -112,10 +124,11 @@ export class UsuarioService {
     return this.http.post<any>(`${ baseUrl }/login`, formData )
           .pipe(
             tap( resp => {
-              localStorage.setItem('xToken', resp.token);
+              this.guardarLocalStorage( resp.token, resp.menu );
             })
           );
   }
+
 
   googleInit(): any {
 
@@ -141,7 +154,7 @@ export class UsuarioService {
     return this.http.post<any>(`${ baseUrl }/login/google`, { token } )
           .pipe(
             tap( resp => {
-              localStorage.setItem('xToken', resp.token);
+              this.guardarLocalStorage( resp.token, resp.menu );
             })
           );
   }
